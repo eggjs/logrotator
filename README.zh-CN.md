@@ -28,13 +28,13 @@ exports.logrotator = true;
 ```js
 // 如果有需要按照文件大小切割的日志，在这里配置
 exports.logrotator = {
-  filesRotateByHour: [],           // 需要按小时切割的文件
-  hourDelimiter: '-',              // 按照小时切割的文件, 小时部分的分隔符.
-  filesRotateBySize: [],           // 需要按大小切割的文件，其他日志文件仍按照通常方式切割
-  maxFileSize: 50 * 1024 * 1024,   // 最大文件大小，默认为50m
-  maxFiles: 10,                    // 按大小切割时，文件最大切割的份数
-  rotateDuration: 60000,           // 按大小切割时，文件扫描的间隔时间
-  maxDays: 31,                     // 日志保留最久天数
+  filesRotateByHour: [], // 需要按小时切割的文件
+  hourDelimiter: '-', // 按照小时切割的文件, 小时部分的分隔符.
+  filesRotateBySize: [], // 需要按大小切割的文件，其他日志文件仍按照通常方式切割
+  maxFileSize: 50 * 1024 * 1024, // 最大文件大小，默认为50m
+  maxFiles: 10, // 按大小切割时，文件最大切割的份数
+  rotateDuration: 60000, // 按大小切割时，文件扫描的间隔时间
+  maxDays: 31, // 日志保留最久天数
 };
 ```
 
@@ -74,9 +74,9 @@ module.exports = app => {
       type: 'worker', // only one worker run this task
       cron: '10 * * * *', // custom cron, or use interval
     },
-    * task() {
+    *task() {
       yield rotator.rotate();
-    }
+    },
   };
 };
 
@@ -86,7 +86,7 @@ function getRotator(app) {
     // LogRotator will rename srcPath to targetPath
     // 返回一个 map，其中包含 srcPath 和 targetPath，
     // LogRotator 会将 srcPath 重命名成 targetPath
-    * getRotateFiles() {
+    *getRotateFiles() {
       const files = new Map();
       const srcPath = '/home/admin/foo.log';
       const targetPath = '/home/admin/foo.log.2016.09.30';
