@@ -1,4 +1,4 @@
-import { EggCore } from '@eggjs/core';
+import type { EggCore } from '@eggjs/core';
 import { HourRotator } from '../../lib/hour_rotator.js';
 
 export default (app: EggCore) => {
@@ -14,6 +14,5 @@ export default (app: EggCore) => {
     async task() {
       await rotator.rotate();
     },
-
   };
 };

@@ -42,16 +42,18 @@
     "utility": "^2.5.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.17.3",
+    "@arethetypeswrong/cli": "^0.17.4",
     "@eggjs/bin": "7",
-    "@eggjs/mock": "^6.0.5",
+    "@eggjs/mock": "^6.0.6",
     "@eggjs/tsconfig": "1",
     "@types/mocha": "10",
     "@types/node": "22",
     "egg": "^4.0.5",
     "egg-logger": "^3.6.1",
-    "eslint": "8",
-    "eslint-config-egg": "14",
+    "husky": "9",
+    "lint-staged": "15",
+    "oxlint": "^0.16.2",
+    "prettier": "3",
     "glob": "^11.0.1",
     "rimraf": "6",
     "snap-shot-it": "^7.9.10",
@@ -61,7 +63,7 @@
     "typescript": "5"
   },
   "scripts": {
-    "lint": "eslint --cache src test --ext .ts",
+    "lint": "oxlint",
     "pretest": "npm run clean && npm run lint -- --fix",
     "test": "egg-bin test",
     "test:snapshot:update": "SNAPSHOT_UPDATE=1 egg-bin test",
@@ -69,7 +71,15 @@
     "ci": "egg-bin cov",
     "postci": "npm run prepublishOnly && npm run clean",
     "clean": "rimraf dist",
-    "prepublishOnly": "tshy && tshy-after && attw --pack"
+    "prepublishOnly": "tshy && tshy-after && attw --pack",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*": "prettier --write --ignore-unknown --cache",
+    "*.{ts,js,json,md,yml}": [
+      "prettier --ignore-unknown --write",
+      "oxlint --fix"
+    ]
   },
   "type": "module",
   "tshy": {

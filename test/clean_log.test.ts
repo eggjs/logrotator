@@ -1,14 +1,15 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
-import { mkdir, rm } from 'node:fs/promises';
-import fsPromises from 'node:fs/promises';
-import assert from 'node:assert';
+import fsPromises, { mkdir, rm } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+
 import { glob } from 'glob';
-import { mm, MockApplication } from '@eggjs/mock';
+import { mm, type MockApplication } from '@eggjs/mock';
 import moment from 'moment';
 import { FileTransport } from 'egg-logger';
 import snapshot from 'snap-shot-it';
+import 'egg';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,9 +28,18 @@ describe('test/clean_log.test.ts', () => {
     });
     await app.ready();
     logDir = app.config.logger.dir;
-    app.loggers.get('bizLogger')!.set('anotherFile', new FileTransport({
-      file: path.join(app.config.customLogger.bizLogger.file, '..', 'another-biz.log'),
-    }));
+    const bizLogger = app.loggers.get('bizLogger');
+    assert(bizLogger);
+    bizLogger.set(
+      'anotherFile',
+      new FileTransport({
+        file: path.join(
+          app.config.customLogger.bizLogger.file,
+          '..',
+          'another-biz.log'
+        ),
+      })
+    );
   });
   after(() => app.close());
 
@@ -38,34 +48,105 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should clean log by maxDays', async () => {
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(30, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(50, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(6, 'months').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `another-biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`), 'foo');
+    fs.writeFileSync(
+      path.join(logDir, `foo.log.${now.format('YYYY-MM-DD')}`),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(30, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        app.config.customLogger.bizLogger.file,
+        '..',
+        `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        app.config.customLogger.bizLogger.file,
+        '..',
+        `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(50, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(6, 'months').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        app.config.customLogger.bizLogger.file,
+        '..',
+        `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        app.config.customLogger.bizLogger.file,
+        '..',
+        `another-biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
 
     await app.runSchedule(schedule);
 
@@ -91,11 +172,25 @@ describe('test/clean_log.test.ts', () => {
     filepath = `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`;
     assert(fs.existsSync(path.join(logDir, filepath)));
 
-    assert(fs.existsSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`)));
+    assert(
+      fs.existsSync(
+        path.join(
+          app.config.customLogger.bizLogger.file,
+          '..',
+          `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+        )
+      )
+    );
 
-    assert(fs.existsSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`)));
+    assert(
+      fs.existsSync(
+        path.join(
+          app.config.customLogger.bizLogger.file,
+          '..',
+          `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+        )
+      )
+    );
 
     // clean below
     filepath = `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`;
@@ -113,11 +208,27 @@ describe('test/clean_log.test.ts', () => {
     filepath = `foo.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`;
     assert.equal(fs.existsSync(path.join(logDir, filepath)), false);
 
-    assert.equal(fs.existsSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`)), false);
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          app.config.customLogger.bizLogger.file,
+          '..',
+          `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+        )
+      ),
+      false
+    );
 
-    assert.equal(fs.existsSync(path.join(app.config.customLogger.bizLogger.file, '..',
-      `another-biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`)), false);
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          app.config.customLogger.bizLogger.file,
+          '..',
+          `another-biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+        )
+      ),
+      false
+    );
   });
 
   it('should not clean log with invalid date', async () => {
@@ -131,8 +242,13 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should not clean log with invalid format', async () => {
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(33, 'days').format('YYYYMMDD')}`), 'foo');
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(33, 'days').format('YYYYMMDD')}`
+      ),
+      'foo'
+    );
 
     await app.runSchedule(schedule);
 
@@ -141,8 +257,13 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should clean log with YYYY-MM-DD-HH', async () => {
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD-HH')}`), 'foo');
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD-HH')}`
+      ),
+      'foo'
+    );
 
     await app.runSchedule(schedule);
 
@@ -152,7 +273,9 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should error when readdir err', async () => {
-    mm(fsPromises, 'readdir', (dir: string) => new Promise((_, reject) => reject(new Error(`Permission: readdir ${dir}`))));
+    mm(fsPromises, 'readdir', async (dir: string) => {
+      throw new Error(`Permission: readdir ${dir}`);
+    });
     let message = '';
     mm(app.coreLogger, 'error', (err: Error) => (message = err.message));
 
@@ -167,7 +290,9 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should ignore clean when exception', async () => {
-    mm(fsPromises, 'unlink', (file: string) => new Promise((_, reject) => reject(new Error(`unlink ${file} error`))));
+    mm(fsPromises, 'unlink', async (file: string) => {
+      throw new Error(`unlink ${file} error`);
+    });
     let message = '';
     mm(app.coreLogger, 'error', (err: Error) => (message = err.message));
 
@@ -183,33 +308,97 @@ describe('test/clean_log.test.ts', () => {
 
   it('should disable clean log when set maxDays = 0', async () => {
     mm(app.config.logrotator, 'maxDays', 0);
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`), 'foo');
-    fs.writeFileSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`), 'foo');
+    fs.writeFileSync(
+      path.join(logDir, `foo.log.${now.format('YYYY-MM-DD')}`),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
+    fs.writeFileSync(
+      path.join(
+        logDir,
+        `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`
+      ),
+      'foo'
+    );
 
     await app.runSchedule(schedule);
 
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.format('YYYY-MM-DD')}`)), true);
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`)), true);
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`)), true);
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`)), true);
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`)), true);
-    assert.equal(fs.existsSync(path.join(logDir,
-      `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`)), true);
+    assert.equal(
+      fs.existsSync(path.join(logDir, `foo.log.${now.format('YYYY-MM-DD')}`)),
+      true
+    );
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          logDir,
+          `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`
+        )
+      ),
+      true
+    );
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          logDir,
+          `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`
+        )
+      ),
+      true
+    );
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          logDir,
+          `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+        )
+      ),
+      true
+    );
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          logDir,
+          `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`
+        )
+      ),
+      true
+    );
+    assert.equal(
+      fs.existsSync(
+        path.join(
+          logDir,
+          `foo.log.${now.clone().subtract(33, 'days').format('YYYY-MM-DD')}`
+        )
+      ),
+      true
+    );
   });
 
   // windows can't remove un close file, ignore it
@@ -218,9 +407,14 @@ describe('test/clean_log.test.ts', () => {
       let message: string | undefined;
       mm(app.coreLogger, 'error', (err: Error) => (message = err.message));
 
-      const customLoggerDir = path.join(app.config.customLogger.bizLogger.file, '..');
-      const logfile = path.join(customLoggerDir,
-        `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`);
+      const customLoggerDir = path.join(
+        app.config.customLogger.bizLogger.file,
+        '..'
+      );
+      const logfile = path.join(
+        customLoggerDir,
+        `biz.log.${now.clone().subtract(1, 'years').format('YYYY-MM-DD')}`
+      );
       fs.writeFileSync(logfile, 'foo');
       await rm(customLoggerDir, { recursive: true, force: true });
 

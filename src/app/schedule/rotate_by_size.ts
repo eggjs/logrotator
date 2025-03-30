@@ -1,4 +1,4 @@
-import { EggCore } from '@eggjs/core';
+import type { EggCore } from '@eggjs/core';
 import { SizeRotator } from '../../lib/size_rotator.js';
 
 export default (app: EggCore) => {
