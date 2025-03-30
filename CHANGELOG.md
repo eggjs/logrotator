@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/eggjs/logrotator/compare/v4.0.0...v4.1.0) (2025-03-30)
+
+
+### Features
+
+* use oxlint ([#35](https://github.com/eggjs/logrotator/issues/35)) ([6ed426e](https://github.com/eggjs/logrotator/commit/6ed426e11a107709427a7e6abd7c5b60864e454d))
+
 ## [4.0.0](https://github.com/eggjs/logrotator/compare/v3.2.0...v4.0.0) (2025-02-03)
 
 
