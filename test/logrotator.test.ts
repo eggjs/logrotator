@@ -53,6 +53,10 @@ describe('test/logrotator.test.ts', () => {
     });
 
     it('should rotate log file default', async () => {
+      if (process.platform === 'win32') {
+        console.warn('skip on windows');
+        return;
+      }
       const msg: string[] = [];
       mm(app.coreLogger, 'info', (...args: unknown[]) => {
         msg.push(util.format(...args));

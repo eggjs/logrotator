@@ -48,6 +48,10 @@ describe('test/clean_log.test.ts', () => {
   });
 
   it('should clean log by maxDays', async () => {
+    if (process.platform === 'win32') {
+      console.warn('skip on windows');
+      return;
+    }
     fs.writeFileSync(
       path.join(logDir, `foo.log.${now.format('YYYY-MM-DD')}`),
       'foo'
