@@ -151,46 +151,60 @@ describe('test/clean_log.test.ts', () => {
     await app.runSchedule(schedule);
 
     const files = glob.sync(path.join(logDir, '*.log.*'));
-    // console.log(files);
-    assert(files.length >= 5);
-    assert(files.filter(name => name.indexOf('foo.log.') > 0));
+    assert(
+      files.length >= 5,
+      `files.length: ${files.length}, files: ${JSON.stringify(files)}`
+    );
+    assert(
+      files.some(name => name.includes('foo.log.')),
+      `files: ${JSON.stringify(files)}`
+    );
 
     let filepath: string;
     filepath = `foo.log.${now.format('YYYY-MM-DD')}`;
-    assert(fs.existsSync(path.join(logDir, filepath)));
+    assert(
+      fs.existsSync(path.join(logDir, filepath)),
+      `filepath: ${filepath} not exists`
+    );
 
     // won't clean, because maxDay is 31
     filepath = `foo.log.${now.clone().subtract(1, 'days').format('YYYY-MM-DD')}`;
-    assert(fs.existsSync(path.join(logDir, filepath)));
+    assert(
+      fs.existsSync(path.join(logDir, filepath)),
+      `filepath: ${filepath} not exists`
+    );
 
     filepath = `foo.log.${now.clone().subtract(7, 'days').format('YYYY-MM-DD')}`;
-    assert(fs.existsSync(path.join(logDir, filepath)));
+    assert(
+      fs.existsSync(path.join(logDir, filepath)),
+      `filepath: ${filepath} not exists`
+    );
 
     filepath = `foo.log.${now.clone().subtract(30, 'days').format('YYYY-MM-DD')}`;
-    assert(fs.existsSync(path.join(logDir, filepath)));
+    assert(
+      fs.existsSync(path.join(logDir, filepath)),
+      `filepath: ${filepath} not exists`
+    );
 
     filepath = `foo.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`;
-    assert(fs.existsSync(path.join(logDir, filepath)));
-
     assert(
-      fs.existsSync(
-        path.join(
-          app.config.customLogger.bizLogger.file,
-          '..',
-          `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
-        )
-      )
+      fs.existsSync(path.join(logDir, filepath)),
+      `filepath: ${filepath} not exists`
     );
 
-    assert(
-      fs.existsSync(
-        path.join(
-          app.config.customLogger.bizLogger.file,
-          '..',
-          `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
-        )
-      )
+    filepath = path.join(
+      app.config.customLogger.bizLogger.file,
+      '..',
+      `biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
     );
+    assert(fs.existsSync(filepath), `filepath: ${filepath} not exists`);
+
+    filepath = path.join(
+      app.config.customLogger.bizLogger.file,
+      '..',
+      `another-biz.log.${now.clone().subtract(31, 'days').format('YYYY-MM-DD')}`
+    );
+    assert(fs.existsSync(filepath), `filepath: ${filepath} not exists`);
 
     // clean below
     filepath = `foo.log.${now.clone().subtract(32, 'days').format('YYYY-MM-DD')}`;

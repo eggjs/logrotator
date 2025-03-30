@@ -60,11 +60,20 @@ describe('test/logrotator.test.ts', () => {
       await app.runSchedule(schedule);
 
       const files = glob.sync(path.join(app.config.logger.dir, '*.log.*'));
-      assert(files.length > 4);
-      assert(files.filter(name => name.indexOf('foo.log.') > 0));
-      assert(files.filter(name => name.indexOf('relative.log.') > 0));
+      assert(
+        files.length > 4,
+        `files.length: ${files.length}, files: ${JSON.stringify(files)}`
+      );
+      assert(
+        files.some(name => name.includes('foo1.log.')),
+        `should include "foo1.log.", files: ${JSON.stringify(files)}`
+      );
+      assert(
+        files.some(name => name.includes('relative.log.')),
+        `should include "relative.log.", files: ${JSON.stringify(files)}`
+      );
       for (const file of files) {
-        assert(/log.\d{4}-\d{2}-\d{2}$/.test(file));
+        assert.match(file, /log.\d{4}-\d{2}-\d{2}$/);
       }
 
       const logDir = app.config.logger.dir;
@@ -91,7 +100,7 @@ describe('test/logrotator.test.ts', () => {
       );
       assert.equal(fs.existsSync(path.join(logDir, 'common-error.log')), false);
 
-      assert(/rotate files success by DayRotator/.test(msg[1]));
+      assert.match(msg[1], /rotate files success by DayRotator/);
 
       // run again should work
       await app.runSchedule(schedule);
