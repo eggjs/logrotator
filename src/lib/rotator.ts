@@ -4,8 +4,9 @@ import fs from 'node:fs/promises';
 import { pipeline } from 'node:stream/promises';
 import { createGzip } from 'node:zlib';
 import { debuglog } from 'node:util';
+
 import { exists } from 'utility';
-import { EggCore } from '@eggjs/core';
+import type { EggCore } from '@eggjs/core';
 
 const debug = debuglog('@eggjs/logrotator/lib/rotator');
 
@@ -39,29 +40,43 @@ export abstract class LogRotator {
     for (const file of files.values()) {
       try {
         debug('rename from %s to %s', file.srcPath, file.targetPath);
-        await renameOrDelete(file.srcPath, file.targetPath, this.app.config.logrotator.gzip);
+        await renameOrDelete(
+          file.srcPath,
+          file.targetPath,
+          this.app.config.logrotator.gzip
+        );
         rotatedFiles.push(`${file.srcPath} -> ${file.targetPath}`);
-      } catch (err: any) {
-        err.message = `[@eggjs/logrotator] rename ${file.srcPath}, found exception: ` + err.message;
+      } catch (e) {
+        const err = e as Error;
+        err.message =
+          `[@eggjs/logrotator] rename ${file.srcPath}, found exception: ` +
+          err.message;
         this.logger.error(err);
       }
     }
 
-    if (rotatedFiles.length) {
+    if (rotatedFiles.length > 0) {
       // tell every one to reload logger
       this.logger.info('[@eggjs/logrotator] broadcast log-reload');
       this.app.messenger.sendToApp('log-reload');
       this.app.messenger.sendToAgent('log-reload');
     }
 
-    this.logger.info('[@eggjs/logrotator] rotate files success by %s, files %j',
-      this.constructor.name, rotatedFiles);
+    this.logger.info(
+      '[@eggjs/logrotator] rotate files success by %s, files %j',
+      this.constructor.name,
+      rotatedFiles
+    );
   }
 }
 
 // rename from srcPath to targetPath, for example foo.log.1 > foo.log.2
 // if gzip is true, then use gzip to compress the file, and delete the src file, for example foo.log.1 -> foo.log.2.gz
-async function renameOrDelete(srcPath: string, targetPath: string, gzip: boolean) {
+async function renameOrDelete(
+  srcPath: string,
+  targetPath: string,
+  gzip: boolean
+) {
   if (srcPath === targetPath) {
     return;
   }
@@ -80,7 +95,11 @@ async function renameOrDelete(srcPath: string, targetPath: string, gzip: boolean
   if (gzip === true) {
     const tmpPath = `${targetPath}.tmp`;
     await fs.rename(srcPath, tmpPath);
-    await pipeline(createReadStream(tmpPath), createGzip(), createWriteStream(targetPath));
+    await pipeline(
+      createReadStream(tmpPath),
+      createGzip(),
+      createWriteStream(targetPath)
+    );
     await fs.unlink(tmpPath);
   } else {
     await fs.rename(srcPath, targetPath);

@@ -67,7 +67,7 @@ export default {
     filesRotateBySize: null,
     maxFileSize: 50 * 1024 * 1024,
     maxFiles: 10,
-    rotateDuration: 60000,
+    rotateDuration: 60_000,
     maxDays: 31,
     gzip: false,
   } as LogrotatorConfig,

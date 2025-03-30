@@ -1,5 +1,5 @@
 'use strict';
 
 exports.logger = {
-  rotateLogDirs: [ '/no/exists' ],
+  rotateLogDirs: ['/no/exists'],
 };

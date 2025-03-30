@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { debuglog } from 'node:util';
+
 import { exists } from 'utility';
-import { LogRotator, RotateFile } from './rotator.js';
+
+import { LogRotator, type RotateFile } from './rotator.js';
 
 const debug = debuglog('@eggjs/logrotator/lib/size_rotator');
 
@@ -13,7 +15,8 @@ export class SizeRotator extends LogRotator {
   async getRotateFiles() {
     const files = new Map<string, RotateFile>();
     const logDir = this.app.config.logger.dir;
-    const filesRotateBySize = this.app.config.logrotator.filesRotateBySize || [];
+    const filesRotateBySize =
+      this.app.config.logrotator.filesRotateBySize || [];
     const maxFileSize = this.app.config.logrotator.maxFileSize;
     const maxFiles = this.app.config.logrotator.maxFiles;
     for (let logPath of filesRotateBySize) {
@@ -28,17 +31,22 @@ export class SizeRotator extends LogRotator {
       const size = stat.size;
       try {
         if (size >= maxFileSize) {
-          this.logger.info(`[@eggjs/logrotator] file ${logPath} reach the maximum file size, current size: ${size}, max size: ${maxFileSize}`);
+          this.logger.info(
+            `[@eggjs/logrotator] file ${logPath} reach the maximum file size, current size: ${size}, max size: ${maxFileSize}`
+          );
           // delete max log file if exists, otherwise will throw when rename
           const maxFileName = `${logPath}.${maxFiles}`;
           const stat = await exists(maxFileName);
           if (stat) {
             await fs.unlink(maxFileName);
-            this.logger.info(`[@eggjs/logrotator] delete max log file ${maxFileName}`);
+            this.logger.info(
+              `[@eggjs/logrotator] delete max log file ${maxFileName}`
+            );
           }
           this._setFile(logPath, files);
         }
-      } catch (err: any) {
+      } catch (e) {
+        const err = e as Error;
         err.message = '[@eggjs/logrotator] ' + err.message;
         this.logger.error(err);
       }

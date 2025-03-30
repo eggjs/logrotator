@@ -1,8 +1,10 @@
 import moment from 'moment';
 import path from 'node:path';
 import { debuglog } from 'node:util';
+
 import { exists } from 'utility';
-import { LogRotator, RotateFile } from './rotator.js';
+
+import { LogRotator, type RotateFile } from './rotator.js';
 
 const debug = debuglog('@eggjs/logrotator/lib/hour_rotator');
 
@@ -12,7 +14,8 @@ export class HourRotator extends LogRotator {
   async getRotateFiles() {
     const files = new Map<string, RotateFile>();
     const logDir = this.app.config.logger.dir;
-    const filesRotateByHour = this.app.config.logrotator.filesRotateByHour || [];
+    const filesRotateByHour =
+      this.app.config.logrotator.filesRotateByHour || [];
 
     for (let logPath of filesRotateByHour) {
       // support relative path
@@ -36,7 +39,12 @@ export class HourRotator extends LogRotator {
   _setFile(srcPath: string, files: Map<string, RotateFile>) {
     if (!files.has(srcPath)) {
       const ext = this.app.config.logrotator.gzip === true ? '.gz' : '';
-      const targetPath = srcPath + moment().subtract(1, 'hours').format(`.YYYY-MM-DD${this.hourDelimiter}HH`) + ext;
+      const targetPath =
+        srcPath +
+        moment()
+          .subtract(1, 'hours')
+          .format(`.YYYY-MM-DD${this.hourDelimiter}HH`) +
+        ext;
       debug('set file %s => %s', srcPath, targetPath);
       files.set(srcPath, { srcPath, targetPath });
     }
